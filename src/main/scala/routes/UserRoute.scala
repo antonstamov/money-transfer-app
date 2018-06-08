@@ -1,8 +1,10 @@
 package routes
 
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.server.Directives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import dto.MessageResponse
 import repo.{UserRepository, WalletRepository}
 import restapi.utils.db.DatabaseService
 import io.circe.generic.auto._
@@ -46,17 +48,23 @@ class UserRoute(val databaseService: DatabaseService)(implicit ex: ExecutionCont
               }
           } ~
             pathPrefix("wallet") {
-              get {
-                complete(OK -> walletRepository.findByUserId(id))
-              } ~
-              pathPrefix("add_funds") {
-                put {
-                  for {
-
-                  }
-                  complete()
+              pathEndOrSingleSlash {
+                get {
+                  complete(OK -> walletRepository.findByUserId(id))
                 }
-              }
+              } ~
+                pathPrefix("add_funds") {
+                  pathEndOrSingleSlash {
+                    put {
+                      entity(as[AddFundsRequest]) { req: AddFundsRequest =>
+                        onSuccess(walletRepository.findByUserId(id)) {
+                          case Some(wallet) => complete(StatusCodes.OK -> walletRepository.updateByUserId(id, wallet.copy(amount = wallet.amount + req.amount)))
+                          case None => complete(StatusCodes.NotFound -> MessageResponse(s"wallet with userId = $id not found"))
+                        }
+                      }
+                    }
+                  }
+                }
             }
         }
     }
@@ -69,3 +77,5 @@ case class CreateUserRequest(name: String) {
 case class UpdateUserRequest(name: String) {
   def toUser(id: Int) = UserRow(id, name)
 }
+
+case class AddFundsRequest(amount: Double)
