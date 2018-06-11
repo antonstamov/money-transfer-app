@@ -1,7 +1,7 @@
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import models.db.{UserRow, WalletRow}
+import models.db.{TransferRow, UserRow, WalletRow}
 import org.scalatest.{BeforeAndAfter, FlatSpec, MustMatchers}
 import restapi.utils.db.{DatabaseMigrationManager, DatabaseService}
 import routes.{AddFundsRequest, CreateTransferRequest, CreateUserRequest, HttpRoute}
@@ -88,7 +88,20 @@ class RoutesSpec extends FlatSpec with BeforeAndAfter with ScalatestRouteTest wi
       status must equal(StatusCodes.OK)
       val res = responseAs[WalletRow]
       res.amount must equal(2.5)
-      logger.info(s"Sender wallet: $res")
+      logger.info(s"Receiver wallet: $res")
+    }
+  }
+
+  "Transfer " should "appear in transfer list" in {
+    Get(s"/transfers") ~> routes ~> check {
+      status must equal(StatusCodes.OK)
+      val res = responseAs[List[TransferRow]]
+      res.size must equal(1)
+      val transfer = res.head
+      transfer.senderId must equal(senderId)
+      transfer.receiverId must equal(receiverId)
+      transfer.amount must equal(2.5)
+      logger.info(s"Transfer list: $res")
     }
   }
 }
