@@ -1,3 +1,5 @@
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/antonstamov/money-transfer-app) 
+
 # Money Transfer Test App
 Simple demo app that demonstrates money transfer between users.
 ###Used Frameworks:
