@@ -5,7 +5,7 @@ version := "1.0-SNAPSHOT"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.11"
 
 val akkaHttpV = "10.0.11"
 val slickV = "3.2.1"
